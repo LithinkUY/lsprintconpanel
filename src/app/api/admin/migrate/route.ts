@@ -9,12 +9,21 @@ export async function GET() {
     try {
         logs.push("Starting database migration on master branch...");
 
+        await sql`
+            CREATE TABLE IF NOT EXISTS site_config (
+                key VARCHAR UNIQUE,
+                value JSONB,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        `;
+        logs.push("Ensured 'site_config' table exists.");
+
         // 1. Generate unique, non-empty slugs for any service with null/empty slugs
         const emptySlugServices = await sql`
             SELECT id, name FROM services WHERE slug IS NULL OR slug = ''
         `;
         logs.push(`Found ${emptySlugServices.length} services with empty or null slugs.`);
-        
+
         for (const s of emptySlugServices) {
             const cleanName = (s.name || "")
                 .toLowerCase()
@@ -59,7 +68,7 @@ export async function GET() {
             FROM information_schema.columns 
             WHERE table_name = 'service_products' AND column_name = 'service_id'
         `;
-        
+
         if (columnCheck.length === 0) {
             logs.push("Adding column 'service_id' to 'service_products' table...");
             await sql`

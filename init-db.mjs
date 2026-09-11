@@ -1,6 +1,13 @@
-import postgres from 'postgres';
+import { neon } from '@neondatabase/serverless';
+import dotenv from 'dotenv';
 
-const sql = postgres('postgresql://postgres.aaotbycstcwcvbrkkqwr:VIcKcmHzLlxSk3X5@aws-0-us-west-2.pooler.supabase.com:6543/postgres', { ssl: 'require' });
+dotenv.config({ path: '.env.local' });
+
+if (!process.env.DATABASE_URL) {
+    throw new Error('DATABASE_URL is required');
+}
+
+const sql = neon(process.env.DATABASE_URL);
 
 async function main() {
     console.log("Starting database initialization...");
@@ -231,7 +238,7 @@ async function main() {
             );
         `;
         console.log("Table pages created.");
-        
+
         await sql`
             CREATE TABLE IF NOT EXISTS pending_payments (
                 id SERIAL PRIMARY KEY,
@@ -250,8 +257,6 @@ async function main() {
         console.log("Database initialized successfully!");
     } catch (e) {
         console.error("Error initializing database:", e);
-    } finally {
-        await sql.end();
     }
 }
 

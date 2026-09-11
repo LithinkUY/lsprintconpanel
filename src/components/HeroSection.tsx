@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { SiteConfig } from "@/lib/types";
 import { mockSiteConfig } from "@/lib/mock-data";
+import { getHeroMediaType, extractYoutubeId, getYoutubeBgEmbedUrl } from "@/lib/media";
 
 export default function HeroSection() {
     const [config, setConfig] = useState<SiteConfig>(mockSiteConfig);
@@ -61,29 +62,38 @@ export default function HeroSection() {
         : [config.hero_subtitle || ""];
     const lines = config.hero_title.split("\n");
 
-    const isBase64Video = config.hero_video_url.startsWith("data:video");
-    const isBase64Image = config.hero_video_url.startsWith("data:image");
-    const isExternalVideo = config.hero_video_url && !config.hero_video_url.startsWith("data:");
-    const hasMedia = config.hero_video_url.length > 0;
+    const mediaType = getHeroMediaType(config.hero_video_url);
+    const youtubeId = mediaType === "youtube" ? extractYoutubeId(config.hero_video_url) : null;
 
     const inkColor = isLtr ? "#00CFFF" : "#E91E8C";
 
     return (
         <section className="relative w-full h-screen min-h-[600px] flex items-center overflow-hidden">
-            {(isBase64Video || isExternalVideo) && (
+            {mediaType === "youtube" && youtubeId && (
+                <div className="absolute inset-0 w-full h-full overflow-hidden pointer-events-none">
+                    <iframe
+                        src={getYoutubeBgEmbedUrl(youtubeId)}
+                        title="Hero Video Background"
+                        allow="autoplay; encrypted-media; picture-in-picture"
+                        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[160%] h-[160%] min-w-full min-h-full object-cover pointer-events-none"
+                        style={{ filter: "brightness(0.4)" }}
+                    />
+                </div>
+            )}
+            {mediaType === "video" && (
                 <video autoPlay muted loop playsInline
                     className="absolute inset-0 w-full h-full object-cover"
                     style={{ filter: "brightness(0.4)" }}
                     src={config.hero_video_url}
                 />
             )}
-            {isBase64Image && (
+            {mediaType === "image" && (
                 <img src={config.hero_video_url} alt="hero"
                     className="absolute inset-0 w-full h-full object-cover"
                     style={{ filter: "brightness(0.4)" }}
                 />
             )}
-            {!hasMedia && (
+            {mediaType === "none" && (
                 <div className="absolute inset-0"
                     style={{ background: "linear-gradient(135deg, #0a0a0a 0%, #111827 50%, #0a0a0a 100%)" }}
                 />

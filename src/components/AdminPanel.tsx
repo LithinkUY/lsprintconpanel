@@ -24,11 +24,15 @@ import {
     ProcessConfig, ProcessStep, defaultProcessConfig,
 } from "@/components/ProcessSection";
 import { defaultFooterConfig, FooterConfig, SocialLink } from "@/components/Footer";
+import { getHeroMediaType, extractYoutubeId, getYoutubeBgEmbedUrl } from "@/lib/media";
 
 // ── API helpers ───────────────────────────────────────────────
 async function apiGet<T>(url: string): Promise<T> {
     const res = await fetch(url);
-    if (!res.ok) throw new Error(`GET ${url} → ${res.status}`);
+    if (!res.ok) {
+        const errJson = await res.json().catch(() => null);
+        throw new Error(errJson?.error || `GET ${url} → ${res.status}`);
+    }
     return res.json();
 }
 async function apiPut<T>(url: string, body: unknown): Promise<T> {
@@ -37,7 +41,10 @@ async function apiPut<T>(url: string, body: unknown): Promise<T> {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
     });
-    if (!res.ok) throw new Error(`PUT ${url} → ${res.status}`);
+    if (!res.ok) {
+        const errJson = await res.json().catch(() => null);
+        throw new Error(errJson?.error || `PUT ${url} → ${res.status}`);
+    }
     return res.json();
 }
 async function apiPost<T>(url: string, body: unknown): Promise<T> {
@@ -46,12 +53,18 @@ async function apiPost<T>(url: string, body: unknown): Promise<T> {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
     });
-    if (!res.ok) throw new Error(`POST ${url} → ${res.status}`);
+    if (!res.ok) {
+        const errJson = await res.json().catch(() => null);
+        throw new Error(errJson?.error || `POST ${url} → ${res.status}`);
+    }
     return res.json();
 }
 async function apiDelete(url: string): Promise<void> {
     const res = await fetch(url, { method: "DELETE" });
-    if (!res.ok) throw new Error(`DELETE ${url} → ${res.status}`);
+    if (!res.ok) {
+        const errJson = await res.json().catch(() => null);
+        throw new Error(errJson?.error || `DELETE ${url} → ${res.status}`);
+    }
 }
 
 async function loadConfigFromApi(): Promise<SiteConfig> {
@@ -79,6 +92,35 @@ function fileToBase64(file: File): Promise<string> {
         reader.onload = () => resolve(reader.result as string);
         reader.onerror = reject;
         reader.readAsDataURL(file);
+    });
+}
+
+function resizeImage(file: File, maxPx = 1200, quality = 0.82): Promise<string> {
+    return new Promise((resolve, reject) => {
+        if (!file.type.startsWith("image/")) {
+            return fileToBase64(file).then(resolve).catch(reject);
+        }
+        const img = new Image();
+        const url = URL.createObjectURL(file);
+        img.onload = () => {
+            const scale = Math.min(1, maxPx / Math.max(img.width, img.height));
+            const canvas = document.createElement("canvas");
+            canvas.width = Math.round(img.width * scale);
+            canvas.height = Math.round(img.height * scale);
+            const ctx = canvas.getContext("2d");
+            if (!ctx) {
+                URL.revokeObjectURL(url);
+                return fileToBase64(file).then(resolve).catch(reject);
+            }
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+            URL.revokeObjectURL(url);
+            resolve(canvas.toDataURL("image/jpeg", quality));
+        };
+        img.onerror = () => {
+            URL.revokeObjectURL(url);
+            fileToBase64(file).then(resolve).catch(reject);
+        };
+        img.src = url;
     });
 }
 
@@ -718,8 +760,13 @@ function ProductEditor({
     const removeDetail = (i: number) => onChange({ ...product, details: (product.details ?? []).filter((_, j) => j !== i) });
 
     const handleImage = async (file: File) => {
-        const b64 = await fileToBase64(file);
-        onChange({ ...product, image_url: b64 });
+        try {
+            const b64 = await resizeImage(file, 900);
+            onChange({ ...product, image_url: b64 });
+        } catch {
+            const b64 = await fileToBase64(file);
+            onChange({ ...product, image_url: b64 });
+        }
     };
 
     const toggleVariant = (vid: number) => {
@@ -937,8 +984,13 @@ function ServicesAdmin({ onSave }: { onSave: (msg: string) => void }) {
     };
 
     const handleServiceImage = async (id: string, file: File) => {
-        const b64 = await fileToBase64(file);
-        updateField(id, "image_url", b64);
+        try {
+            const b64 = await resizeImage(file, 900);
+            updateField(id, "image_url", b64);
+        } catch {
+            const b64 = await fileToBase64(file);
+            updateField(id, "image_url", b64);
+        }
     };
 
     const addService = () => {
@@ -1757,43 +1809,54 @@ function SiteConfigAdmin({ onSave }: { onSave: (msg: string) => void }) {
 
     useEffect(() => { loadConfigFromApi().then(setCfg); }, []);
 
-    // Resize image before storing to stay within quota
-    const resizeImage = (file: File, maxPx = 1280): Promise<string> =>
-        new Promise((resolve) => {
-            const img = new window.Image();
-            const url = URL.createObjectURL(file);
-            img.onload = () => {
-                const scale = Math.min(1, maxPx / Math.max(img.width, img.height));
-                const canvas = document.createElement("canvas");
-                canvas.width = Math.round(img.width * scale);
-                canvas.height = Math.round(img.height * scale);
-                canvas.getContext("2d")!.drawImage(img, 0, 0, canvas.width, canvas.height);
-                URL.revokeObjectURL(url);
-                resolve(canvas.toDataURL("image/jpeg", 0.82));
-            };
-            img.src = url;
-        });
-
     const handleMedia = async (file: File) => {
         setMediaError("");
         if (file.type.startsWith("video/")) {
+            if (file.size > 4.5 * 1024 * 1024) {
+                setMediaError(
+                    `El video pesa ${(file.size / (1024 * 1024)).toFixed(1)}MB. En Vercel el límite para subida directa es 4.5MB. Te recomendamos subirlo a YouTube o un CDN y pegar el enlace aquí.`
+                );
+                return;
+            }
             setMediaError("Subiendo video...");
             try {
                 const fd = new FormData();
                 fd.append("file", file);
                 fd.append("type", "media");
                 const res = await fetch("/api/upload", { method: "POST", body: fd });
-                if (!res.ok) throw new Error("Error al subir el video");
+                if (!res.ok) {
+                    const errData = await res.json().catch(() => ({}));
+                    throw new Error(errData.error || "Error al subir el video");
+                }
                 const { url } = await res.json();
                 setCfg(prev => ({ ...prev, hero_video_url: url }));
-                setMediaError("");
+                setMediaError("Video cargado con éxito. Recuerda hacer clic en 'Guardar Cambios'.");
             } catch (e) {
-                setMediaError("Error al subir video: " + String(e));
+                setMediaError("Error al subir video: " + (e instanceof Error ? e.message : String(e)));
             }
             return;
         }
-        const b64 = await resizeImage(file);
-        setCfg(prev => ({ ...prev, hero_video_url: b64 }));
+
+        // Subida de imagen
+        try {
+            setMediaError("Procesando imagen...");
+            const fd = new FormData();
+            fd.append("file", file);
+            fd.append("type", "media");
+            const res = await fetch("/api/upload", { method: "POST", body: fd });
+            if (res.ok) {
+                const { url } = await res.json();
+                setCfg(prev => ({ ...prev, hero_video_url: url }));
+            } else {
+                const b64 = await resizeImage(file, 1400);
+                setCfg(prev => ({ ...prev, hero_video_url: b64 }));
+            }
+            setMediaError("Imagen cargada con éxito. Recuerda hacer clic en 'Guardar Cambios'.");
+        } catch {
+            const b64 = await resizeImage(file, 1400);
+            setCfg(prev => ({ ...prev, hero_video_url: b64 }));
+            setMediaError("Imagen cargada con éxito. Recuerda hacer clic en 'Guardar Cambios'.");
+        }
     };
 
     const handleSave = async () => {
@@ -1812,26 +1875,60 @@ function SiteConfigAdmin({ onSave }: { onSave: (msg: string) => void }) {
     const addSub = () => setCfg({ ...cfg, hero_subtitles: [...subtitles, "Nuevo subtítulo"] });
     const removeSub = (i: number) => setCfg({ ...cfg, hero_subtitles: subtitles.filter((_, j) => j !== i) });
 
+    const mediaType = getHeroMediaType(cfg.hero_video_url);
+    const youtubeId = mediaType === "youtube" ? extractYoutubeId(cfg.hero_video_url) : null;
+
     return (
         <div className="max-w-2xl space-y-6">
             {mediaError && (
-                <div className={mediaError.startsWith("Subiendo") ? "bg-[#00CFFF]/10 border border-[#00CFFF]/30 text-[#00CFFF] text-xs rounded-xl px-4 py-3 font-semibold" : "bg-red-500/10 border border-red-500/30 text-red-400 text-xs rounded-xl px-4 py-3 font-semibold"}>
-                    {mediaError.startsWith("Subiendo") ? "⏳" : "⚠️"} {mediaError}
+                <div className={mediaError.includes("éxito") || mediaError.startsWith("Subiendo") || mediaError.startsWith("Procesando")
+                    ? "bg-[#00CFFF]/10 border border-[#00CFFF]/30 text-[#00CFFF] text-xs rounded-xl px-4 py-3 font-semibold"
+                    : "bg-red-500/10 border border-red-500/30 text-red-400 text-xs rounded-xl px-4 py-3 font-semibold"}>
+                    {mediaError.includes("éxito") ? "✓" : mediaError.startsWith("Subiendo") || mediaError.startsWith("Procesando") ? "⏳" : "⚠️"} {mediaError}
                 </div>
             )}
 
             <div className="portal-card space-y-4">
-                <h3 className="text-sm font-semibold text-white/70">Portada — Fondo (Video o Imagen)</h3>
+                <div className="flex items-center justify-between">
+                    <h3 className="text-sm font-semibold text-white/70">Portada — Fondo (Video o Imagen)</h3>
+                    {mediaType === "youtube" && (
+                        <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-red-500/20 text-red-400 border border-red-500/30">
+                            YouTube Video
+                        </span>
+                    )}
+                    {mediaType === "video" && (
+                        <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-[#00CFFF]/20 text-[#00CFFF] border border-[#00CFFF]/30">
+                            Video MP4
+                        </span>
+                    )}
+                    {mediaType === "image" && (
+                        <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-[#E91E8C]/20 text-[#E91E8C] border border-[#E91E8C]/30">
+                            Imagen de Fondo
+                        </span>
+                    )}
+                    {mediaType === "none" && (
+                        <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-white/10 text-white/40">
+                            Degradado por Defecto
+                        </span>
+                    )}
+                </div>
 
-                <div className="relative w-full h-40 rounded-xl overflow-hidden border border-[#2a2a2a] flex items-center justify-center" style={{ background: "#111" }}>
-                    {cfg.hero_video_url.startsWith("data:video") ? (
-                        <video src={cfg.hero_video_url} autoPlay muted loop className="w-full h-full object-cover opacity-50" />
-                    ) : cfg.hero_video_url.startsWith("data:image") ? (
+                <div className="relative w-full h-44 rounded-xl overflow-hidden border border-[#2a2a2a] flex items-center justify-center" style={{ background: "#111" }}>
+                    {mediaType === "youtube" && youtubeId ? (
+                        <div className="absolute inset-0 w-full h-full overflow-hidden pointer-events-none">
+                            <iframe
+                                src={getYoutubeBgEmbedUrl(youtubeId)}
+                                title="Hero Video Preview"
+                                allow="autoplay; encrypted-media"
+                                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[160%] h-[160%] min-w-full min-h-full object-cover pointer-events-none opacity-60"
+                            />
+                        </div>
+                    ) : mediaType === "video" ? (
+                        <video src={cfg.hero_video_url} autoPlay muted loop playsInline className="w-full h-full object-cover opacity-50" />
+                    ) : mediaType === "image" ? (
                         <img src={cfg.hero_video_url} alt="" className="w-full h-full object-cover opacity-50" />
-                    ) : cfg.hero_video_url ? (
-                        <video src={cfg.hero_video_url} autoPlay muted loop className="w-full h-full object-cover opacity-50" />
                     ) : (
-                        <div className="text-white/20 flex flex-col items-center gap-2"><Video size={32} /><span className="text-xs">Sin media aun</span></div>
+                        <div className="text-white/20 flex flex-col items-center gap-2"><Video size={32} /><span className="text-xs">Sin medio aún (usa degradado corporativo)</span></div>
                     )}
                     <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/30 to-transparent pointer-events-none" />
                     <div className="absolute bottom-3 left-4 text-white font-black text-lg pointer-events-none">{cfg.hero_title.split("\n")[0]}</div>
@@ -1853,12 +1950,30 @@ function SiteConfigAdmin({ onSave }: { onSave: (msg: string) => void }) {
                 </div>
 
                 <div>
-                    <label className="text-xs text-white/40 mb-1 block font-semibold tracking-wider">O PEGAR URL DEL VIDEO (YouTube, CDN, etc.)</label>
+                    <div className="flex items-center justify-between mb-1">
+                        <label className="text-xs text-white/40 font-semibold tracking-wider">
+                            O PEGAR ENLACE (YouTube, Video MP4 o Imagen Web)
+                        </label>
+                        {cfg.hero_video_url && (
+                            <button
+                                type="button"
+                                onClick={() => { setMediaError(""); setCfg({ ...cfg, hero_video_url: "" }); }}
+                                className="text-[11px] text-red-400/70 hover:text-red-400"
+                            >
+                                Quitar fondo
+                            </button>
+                        )}
+                    </div>
                     <input
                         value={cfg.hero_video_url.startsWith("data:") ? "" : cfg.hero_video_url}
-                        onChange={e => { setMediaError(""); setCfg({ ...cfg, hero_video_url: e.target.value }); }}
-                        className="dark-input" placeholder="https://... o /video/hero.mp4"
+                        onChange={e => { setMediaError(""); setCfg({ ...cfg, hero_video_url: e.target.value.trim() }); }}
+                        className="dark-input" placeholder="https://www.youtube.com/watch?v=... o https://...mp4 o imagen https://..."
                     />
+                    {cfg.hero_video_url.startsWith("data:") && (
+                        <p className="text-[11px] text-[#00CFFF]/70 mt-1 italic">
+                            ✓ Imagen cargada desde tu equipo lista para guardar.
+                        </p>
+                    )}
                 </div>
             </div>
 

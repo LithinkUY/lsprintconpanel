@@ -11,7 +11,7 @@ export async function POST() {
 
         const cloudinary = await import("cloudinary");
         const v2 = cloudinary.v2;
-        v2.config({ cloudinary_url: process.env.CLOUDINARY_URL });
+        v2.config(true);
 
         // 1. Fetch images from Cloudinary in the lsprint/media folder
         const result = await v2.api.resources({
