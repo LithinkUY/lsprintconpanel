@@ -44,8 +44,12 @@ export default function ClientsSlider() {
                 <div className="overflow-hidden" ref={emblaRef}>
                     <div className="flex gap-4 items-center">
                         {config.clients.map((client, idx) => (
-                            <div key={idx} className="flex-shrink-0 bg-white/5 rounded-xl p-6 border border-white/10 hover:border-[#00CFFF]/30 transition-all" style={{ width: "200px" }}>
-                                <img src={client.logo_url} alt={client.name} className="w-full h-16 object-contain opacity-70 hover:opacity-100 transition-opacity" />
+                            <div 
+                                key={idx} 
+                                className="flex-shrink-0 bg-[#1a1a1a] rounded-xl overflow-hidden border border-white/10 hover:border-[#00CFFF]/50 transition-all relative group w-[280px] sm:w-[320px] md:flex-1 md:min-w-[200px] md:max-w-[320px]" 
+                                style={{ aspectRatio: "16/9" }}
+                            >
+                                <img src={client.logo_url} alt={client.name} className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                             </div>
                         ))}
                     </div>
