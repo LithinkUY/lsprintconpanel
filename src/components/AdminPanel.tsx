@@ -2026,6 +2026,96 @@ function SiteConfigAdmin({ onSave }: { onSave: (msg: string) => void }) {
                 </div>
             </div>
 
+            <div className="portal-card space-y-4">
+                <h3 className="text-sm font-semibold text-white/70">Logo en el Hero</h3>
+                <div>
+                    <label className="text-xs text-white/40 mb-1 block font-semibold tracking-wider">URL DEL LOGO (opcional)</label>
+                    <input value={cfg.hero_logo_url || ""} onChange={e => setCfg({ ...cfg, hero_logo_url: e.target.value })} className="dark-input" placeholder="https://..." />
+                </div>
+            </div>
+
+            <div className="portal-card space-y-4">
+                <h3 className="text-sm font-semibold text-white/70">Carrusel "Nuestros Clientes"</h3>
+                <div className="flex items-center gap-2">
+                    <input type="checkbox" checked={cfg.clients_slider_active ?? true} onChange={e => setCfg({ ...cfg, clients_slider_active: e.target.checked })} />
+                    <label className="text-sm text-white/80">Mostrar sección</label>
+                </div>
+                <div>
+                    <label className="text-xs text-white/40 mb-1 block font-semibold tracking-wider">TÍTULO</label>
+                    <input value={cfg.clients_slider_title || ""} onChange={e => setCfg({ ...cfg, clients_slider_title: e.target.value })} className="dark-input" />
+                </div>
+                <div className="space-y-2">
+                    <label className="text-xs text-white/40 font-semibold tracking-wider">CLIENTES (Formato JSON, para demo. Nombre y Logo URL)</label>
+                    <textarea rows={4} value={JSON.stringify(cfg.clients || [], null, 2)} onChange={e => { try { setCfg({ ...cfg, clients: JSON.parse(e.target.value) }) } catch {} }} className="dark-input resize-y font-mono text-xs" />
+                </div>
+            </div>
+
+            <div className="portal-card space-y-4">
+                <h3 className="text-sm font-semibold text-white/70">Sección "Sobre Nosotros"</h3>
+                <div className="flex items-center gap-2">
+                    <input type="checkbox" checked={cfg.about_active ?? true} onChange={e => setCfg({ ...cfg, about_active: e.target.checked })} />
+                    <label className="text-sm text-white/80">Mostrar sección</label>
+                </div>
+                <div>
+                    <label className="text-xs text-white/40 mb-1 block font-semibold tracking-wider">TÍTULO</label>
+                    <input value={cfg.about_title || ""} onChange={e => setCfg({ ...cfg, about_title: e.target.value })} className="dark-input" />
+                </div>
+                <div>
+                    <label className="text-xs text-white/40 mb-1 block font-semibold tracking-wider">TEXTO (HTML)</label>
+                    <textarea rows={4} value={cfg.about_text || ""} onChange={e => setCfg({ ...cfg, about_text: e.target.value })} className="dark-input resize-y" />
+                </div>
+                <div>
+                    <label className="text-xs text-white/40 mb-1 block font-semibold tracking-wider">URL DE IMAGEN</label>
+                    <input value={cfg.about_image_url || ""} onChange={e => setCfg({ ...cfg, about_image_url: e.target.value })} className="dark-input" />
+                </div>
+            </div>
+
+            <div className="portal-card space-y-4">
+                <h3 className="text-sm font-semibold text-white/70">Sección de Mapa</h3>
+                <div className="flex items-center gap-2">
+                    <input type="checkbox" checked={cfg.map_active ?? true} onChange={e => setCfg({ ...cfg, map_active: e.target.checked })} />
+                    <label className="text-sm text-white/80">Mostrar sección</label>
+                </div>
+                <div>
+                    <label className="text-xs text-white/40 mb-1 block font-semibold tracking-wider">TÍTULO</label>
+                    <input value={cfg.map_title || ""} onChange={e => setCfg({ ...cfg, map_title: e.target.value })} className="dark-input" />
+                </div>
+                <div>
+                    <label className="text-xs text-white/40 mb-1 block font-semibold tracking-wider">URL EMBED DEL MAPA (iframe src)</label>
+                    <input value={cfg.map_embed_url || ""} onChange={e => setCfg({ ...cfg, map_embed_url: e.target.value })} className="dark-input" />
+                </div>
+            </div>
+
+            <div className="portal-card space-y-4">
+                <h3 className="text-sm font-semibold text-white/70">Sección de Contacto</h3>
+                <div className="flex items-center gap-2">
+                    <input type="checkbox" checked={cfg.contact_active ?? true} onChange={e => setCfg({ ...cfg, contact_active: e.target.checked })} />
+                    <label className="text-sm text-white/80">Mostrar sección</label>
+                </div>
+                <div>
+                    <label className="text-xs text-white/40 mb-1 block font-semibold tracking-wider">TÍTULO</label>
+                    <input value={cfg.contact_title || ""} onChange={e => setCfg({ ...cfg, contact_title: e.target.value })} className="dark-input" />
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label className="text-xs text-white/40 mb-1 block font-semibold tracking-wider">DIRECCIÓN</label>
+                        <input value={cfg.contact_address || ""} onChange={e => setCfg({ ...cfg, contact_address: e.target.value })} className="dark-input" />
+                    </div>
+                    <div>
+                        <label className="text-xs text-white/40 mb-1 block font-semibold tracking-wider">TELÉFONO</label>
+                        <input value={cfg.contact_phone || ""} onChange={e => setCfg({ ...cfg, contact_phone: e.target.value })} className="dark-input" />
+                    </div>
+                    <div>
+                        <label className="text-xs text-white/40 mb-1 block font-semibold tracking-wider">EMAIL</label>
+                        <input value={cfg.contact_email || ""} onChange={e => setCfg({ ...cfg, contact_email: e.target.value })} className="dark-input" />
+                    </div>
+                    <div>
+                        <label className="text-xs text-white/40 mb-1 block font-semibold tracking-wider">HORARIO</label>
+                        <input value={cfg.contact_schedule || ""} onChange={e => setCfg({ ...cfg, contact_schedule: e.target.value })} className="dark-input" />
+                    </div>
+                </div>
+            </div>
+
             <button onClick={handleSave} disabled={saving} className="w-full py-3 rounded-lg bg-[#00CFFF] text-black text-sm font-bold hover:bg-[#00CFFF]/90 transition-colors disabled:opacity-50">
                 {saving ? "Guardando..." : "Guardar Portada"}
             </button>

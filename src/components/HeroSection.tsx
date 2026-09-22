@@ -108,6 +108,13 @@ export default function HeroSection() {
             <div className="relative z-10 max-w-7xl mx-auto px-6 w-full pt-16">
                 <div className="max-w-2xl">
 
+                    {/* Logo del Hero (si existe) */}
+                    {config.hero_logo_url && (
+                        <div className="mb-6">
+                            <img src={config.hero_logo_url} alt="Hero Logo" className="max-h-24 md:max-h-32 object-contain" />
+                        </div>
+                    )}
+
                     {/* Titulos grandes — sin cabezal */}
                     <div className="mb-5">
                         <div className="overflow-hidden mb-1">
