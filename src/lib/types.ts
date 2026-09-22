@@ -102,7 +102,7 @@ export interface SiteConfig {
     hero_logo_url?: string;
     clients_slider_active?: boolean;
     clients_slider_title?: string;
-    clients?: { name: string; logo_url: string }[];
+    clients?: { id?: string; name: string; logo_url: string }[];
     about_active?: boolean;
     about_title?: string;
     about_text?: string;

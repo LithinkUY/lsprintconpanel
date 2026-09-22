@@ -2089,13 +2089,16 @@ function SiteConfigAdmin({ onSave }: { onSave: (msg: string) => void }) {
                 <div className="space-y-3">
                     <div className="flex items-center justify-between">
                         <label className="text-xs text-white/40 font-semibold tracking-wider">CLIENTES</label>
-                        <button onClick={() => setCfg(c => ({...c, clients: [...(c.clients||[]), {name: "Nuevo Cliente", logo_url: ""}]}))} className="text-[11px] text-[#00CFFF] flex items-center gap-1 hover:text-white">
+                        <button onClick={() => setCfg(c => ({...c, clients: [...(c.clients||[]), {id: Date.now().toString(), name: "Nuevo Cliente", logo_url: ""}]}))} className="text-[11px] text-[#00CFFF] flex items-center gap-1 hover:text-white">
                             <Plus size={12}/> Agregar
                         </button>
                     </div>
                     <Reorder.Group axis="y" values={cfg.clients || []} onReorder={vals => setCfg({...cfg, clients: vals})} className="space-y-2">
-                        {(cfg.clients || []).map((client, idx) => (
-                            <Reorder.Item key={idx + "-" + client.name} value={client} className="flex gap-2 items-center bg-white/5 border border-white/10 p-2 rounded-lg cursor-grab active:cursor-grabbing">
+                        {(cfg.clients || []).map((client, idx) => {
+                            // Ensure each client has a stable identifier for drag and drop without re-rendering inputs
+                            const stableKey = client.id || `client-${idx}`;
+                            return (
+                            <Reorder.Item key={stableKey} value={client} className="flex gap-2 items-center bg-white/5 border border-white/10 p-2 rounded-lg cursor-grab active:cursor-grabbing">
                                 <GripVertical size={16} className="text-white/20 flex-shrink-0" />
                                 <div className="flex-1 space-y-2">
                                     <input value={client.name} onChange={e => {
