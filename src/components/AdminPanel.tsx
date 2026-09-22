@@ -1302,7 +1302,7 @@ function LogoAdmin({ onSave }: { onSave: (msg: string) => void }) {
                 <p className="text-xs text-white/40">El ícono en la pestaña del navegador. Recomendado: ICO o PNG cuadrado 32×32 o 64×64 px.</p>
                 <div className="flex items-center gap-4">
                     <div className="w-12 h-12 rounded-lg border border-[#2a2a2a] bg-[#1a1a1a] flex items-center justify-center overflow-hidden flex-shrink-0">
-                        <img src={`/favicon.ico?v=${Date.now()}`} alt="Favicon" className="w-8 h-8 object-contain" onError={e => { (e.target as HTMLImageElement).style.display = "none"; }} />
+                        <img src={`/favicon.ico`} alt="Favicon" className="w-8 h-8 object-contain" onError={e => { (e.target as HTMLImageElement).style.display = "none"; }} />
                     </div>
                     <div className="space-y-2 flex-1">
                         <label className="cursor-pointer block">
