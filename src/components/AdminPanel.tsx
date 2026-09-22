@@ -1809,7 +1809,7 @@ function SiteConfigAdmin({ onSave }: { onSave: (msg: string) => void }) {
 
     useEffect(() => { loadConfigFromApi().then(setCfg); }, []);
 
-    const handleMedia = async (file: File) => {
+    const handleMedia = async (file: File, field: keyof SiteConfig = "hero_video_url") => {
         setMediaError("");
         if (file.type.startsWith("video/")) {
             if (file.size > 4.5 * 1024 * 1024) {
@@ -1829,7 +1829,7 @@ function SiteConfigAdmin({ onSave }: { onSave: (msg: string) => void }) {
                     throw new Error(errData.error || "Error al subir el video");
                 }
                 const { url } = await res.json();
-                setCfg(prev => ({ ...prev, hero_video_url: url }));
+                setCfg(prev => ({ ...prev, [field]: url }));
                 setMediaError("Video cargado con éxito. Recuerda hacer clic en 'Guardar Cambios'.");
             } catch (e) {
                 setMediaError("Error al subir video: " + (e instanceof Error ? e.message : String(e)));
@@ -1846,15 +1846,15 @@ function SiteConfigAdmin({ onSave }: { onSave: (msg: string) => void }) {
             const res = await fetch("/api/upload", { method: "POST", body: fd });
             if (res.ok) {
                 const { url } = await res.json();
-                setCfg(prev => ({ ...prev, hero_video_url: url }));
+                setCfg(prev => ({ ...prev, [field]: url }));
             } else {
                 const b64 = await resizeImage(file, 1400);
-                setCfg(prev => ({ ...prev, hero_video_url: b64 }));
+                setCfg(prev => ({ ...prev, [field]: b64 }));
             }
             setMediaError("Imagen cargada con éxito. Recuerda hacer clic en 'Guardar Cambios'.");
         } catch {
             const b64 = await resizeImage(file, 1400);
-            setCfg(prev => ({ ...prev, hero_video_url: b64 }));
+            setCfg(prev => ({ ...prev, [field]: b64 }));
             setMediaError("Imagen cargada con éxito. Recuerda hacer clic en 'Guardar Cambios'.");
         }
     };
@@ -2028,10 +2028,23 @@ function SiteConfigAdmin({ onSave }: { onSave: (msg: string) => void }) {
 
             <div className="portal-card space-y-4">
                 <h3 className="text-sm font-semibold text-white/70">Logo en el Hero</h3>
-                <div>
-                    <label className="text-xs text-white/40 mb-1 block font-semibold tracking-wider">URL DEL LOGO (opcional)</label>
-                    <input value={cfg.hero_logo_url || ""} onChange={e => setCfg({ ...cfg, hero_logo_url: e.target.value })} className="dark-input" placeholder="https://..." />
+                <div className="flex gap-2">
+                    <div className="flex-1">
+                        <label className="text-xs text-white/40 mb-1 block font-semibold tracking-wider">URL DEL LOGO (opcional)</label>
+                        <input value={cfg.hero_logo_url || ""} onChange={e => setCfg({ ...cfg, hero_logo_url: e.target.value })} className="dark-input" placeholder="https://..." />
+                    </div>
+                    <label className="cursor-pointer self-end">
+                        <div className="h-10 px-4 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-xs font-bold hover:bg-white/10 transition-colors">
+                            Subir
+                        </div>
+                        <input type="file" accept="image/*" className="hidden" onChange={e => e.target.files?.[0] && handleMedia(e.target.files[0], "hero_logo_url")} />
+                    </label>
                 </div>
+                {cfg.hero_logo_url && (
+                    <div className="mt-2 rounded bg-black/40 p-2 inline-block">
+                        <img src={cfg.hero_logo_url} alt="Logo Preview" className="h-12 object-contain" />
+                    </div>
+                )}
             </div>
 
             <div className="portal-card space-y-4">
@@ -2064,10 +2077,23 @@ function SiteConfigAdmin({ onSave }: { onSave: (msg: string) => void }) {
                     <label className="text-xs text-white/40 mb-1 block font-semibold tracking-wider">TEXTO (HTML)</label>
                     <textarea rows={4} value={cfg.about_text || ""} onChange={e => setCfg({ ...cfg, about_text: e.target.value })} className="dark-input resize-y" />
                 </div>
-                <div>
-                    <label className="text-xs text-white/40 mb-1 block font-semibold tracking-wider">URL DE IMAGEN</label>
-                    <input value={cfg.about_image_url || ""} onChange={e => setCfg({ ...cfg, about_image_url: e.target.value })} className="dark-input" />
+                <div className="flex gap-2">
+                    <div className="flex-1">
+                        <label className="text-xs text-white/40 mb-1 block font-semibold tracking-wider">URL DE IMAGEN</label>
+                        <input value={cfg.about_image_url || ""} onChange={e => setCfg({ ...cfg, about_image_url: e.target.value })} className="dark-input" />
+                    </div>
+                    <label className="cursor-pointer self-end">
+                        <div className="h-10 px-4 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-xs font-bold hover:bg-white/10 transition-colors">
+                            Subir
+                        </div>
+                        <input type="file" accept="image/*" className="hidden" onChange={e => e.target.files?.[0] && handleMedia(e.target.files[0], "about_image_url")} />
+                    </label>
                 </div>
+                {cfg.about_image_url && (
+                    <div className="mt-2 rounded bg-black/40 p-2 inline-block">
+                        <img src={cfg.about_image_url} alt="About Preview" className="h-16 object-contain" />
+                    </div>
+                )}
             </div>
 
             <div className="portal-card space-y-4">
