@@ -2028,7 +2028,35 @@ function SiteConfigAdmin({ onSave }: { onSave: (msg: string) => void }) {
             </div>
 
             <div className="portal-card space-y-4">
-                <h3 className="text-sm font-semibold text-white/70">Logo en el Hero</h3>
+                <h3 className="text-sm font-semibold text-white/70">Logo Principal (Cabecera / Menú)</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label className="text-xs text-white/40 mb-1 block font-semibold tracking-wider">TEXTO DEL LOGO (Alternativa a la imagen)</label>
+                        <input value={cfg.logo_text || ""} onChange={e => setCfg({ ...cfg, logo_text: e.target.value })} className="dark-input" placeholder="LSPRINT" />
+                    </div>
+                    <div className="flex gap-2">
+                        <div className="flex-1">
+                            <label className="text-xs text-white/40 mb-1 block font-semibold tracking-wider">URL DEL LOGO (Imagen real)</label>
+                            <input value={cfg.logo_url || ""} onChange={e => setCfg({ ...cfg, logo_url: e.target.value })} className="dark-input" placeholder="https://..." />
+                        </div>
+                        <label className="cursor-pointer self-end">
+                            <div className="h-10 px-4 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-xs font-bold hover:bg-white/10 transition-colors">
+                                Subir
+                            </div>
+                            <input type="file" accept="image/*" className="hidden" onChange={e => e.target.files?.[0] && handleMedia(e.target.files[0], "logo_url")} />
+                        </label>
+                    </div>
+                </div>
+                {cfg.logo_url && (
+                    <div className="mt-2 rounded bg-black/40 p-2 inline-block">
+                        <img src={cfg.logo_url} alt="Main Logo Preview" className="h-12 object-contain" />
+                    </div>
+                )}
+            </div>
+
+            <div className="portal-card space-y-4">
+                <h3 className="text-sm font-semibold text-white/70">Logo extra en la Portada (Hero)</h3>
+                <p className="text-xs text-white/40">Este logo aparecerá solo en el medio del inicio, sobre el título principal.</p>
                 <div className="flex gap-2">
                     <div className="flex-1">
                         <label className="text-xs text-white/40 mb-1 block font-semibold tracking-wider">URL DEL LOGO (opcional)</label>

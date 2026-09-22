@@ -7,9 +7,17 @@ import { NavItem, SiteConfig } from "@/lib/types";
 import { mockSiteConfig } from "@/lib/mock-data";
 import AuthModal, { PortalSession } from "@/components/AuthModal";
 
-// Logo USER con colores CMYK
+// Logo USER con colores CMYK o Imagen
 function UserLogo({ config }: { config: SiteConfig }) {
-    const [c, m, y, w] = config.logo_colors;
+    if (config.logo_url) {
+        return (
+            <Link href="/" className="flex flex-col items-start leading-none">
+                <img src={config.logo_url} alt={config.logo_text || "Logo"} className="h-8 md:h-12 object-contain" />
+            </Link>
+        );
+    }
+
+    const [c, m, y, w] = config.logo_colors || ["#00CFFF", "#E91E8C", "#FFE000", "#FFFFFF"];
     return (
         <Link href="/" className="flex flex-col items-start leading-none">
             <span className="text-3xl font-black tracking-tighter text-white" style={{ fontStyle: "italic" }}>
