@@ -116,6 +116,7 @@ export interface SiteConfig {
     contact_phone?: string;
     contact_email?: string;
     contact_schedule?: string;
+    home_sections_order?: string[];
     nav_items: NavItem[];
     primary_color: string;
     updated_at?: string;

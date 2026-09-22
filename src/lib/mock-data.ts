@@ -40,6 +40,7 @@ export const mockSiteConfig: SiteConfig = {
     contact_phone: "+598 99 123 456",
     contact_email: "hola@lsprint.uy",
     contact_schedule: "Lunes a Viernes 09:00 - 18:00",
+    home_sections_order: ["hero", "clients", "about", "process", "services", "contact"],
     nav_items: [
         { label: "RETIRÁ AQUÍ", href: "/retiro" },
         { label: "HACÉ TU PEDIDO", href: "/pedido" },

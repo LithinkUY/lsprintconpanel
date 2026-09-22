@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import dynamic from "next/dynamic";
 
 const JoditEditor = dynamic(() => import("jodit-react"), { ssr: false });
+import { Reorder } from "framer-motion";
 import {
     LayoutDashboard, Users, Package, Settings, ChevronRight,
     Edit3, Plus, Trash2, Eye, CheckCircle, XCircle, Upload,
@@ -2057,9 +2058,48 @@ function SiteConfigAdmin({ onSave }: { onSave: (msg: string) => void }) {
                     <label className="text-xs text-white/40 mb-1 block font-semibold tracking-wider">TÍTULO</label>
                     <input value={cfg.clients_slider_title || ""} onChange={e => setCfg({ ...cfg, clients_slider_title: e.target.value })} className="dark-input" />
                 </div>
-                <div className="space-y-2">
-                    <label className="text-xs text-white/40 font-semibold tracking-wider">CLIENTES (Formato JSON, para demo. Nombre y Logo URL)</label>
-                    <textarea rows={4} value={JSON.stringify(cfg.clients || [], null, 2)} onChange={e => { try { setCfg({ ...cfg, clients: JSON.parse(e.target.value) }) } catch {} }} className="dark-input resize-y font-mono text-xs" />
+                <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                        <label className="text-xs text-white/40 font-semibold tracking-wider">CLIENTES</label>
+                        <button onClick={() => setCfg(c => ({...c, clients: [...(c.clients||[]), {name: "Nuevo Cliente", logo_url: ""}]}))} className="text-[11px] text-[#00CFFF] flex items-center gap-1 hover:text-white">
+                            <Plus size={12}/> Agregar
+                        </button>
+                    </div>
+                    <Reorder.Group axis="y" values={cfg.clients || []} onReorder={vals => setCfg({...cfg, clients: vals})} className="space-y-2">
+                        {(cfg.clients || []).map((client, idx) => (
+                            <Reorder.Item key={idx + "-" + client.name} value={client} className="flex gap-2 items-center bg-white/5 border border-white/10 p-2 rounded-lg cursor-grab active:cursor-grabbing">
+                                <GripVertical size={16} className="text-white/20 flex-shrink-0" />
+                                <div className="flex-1 space-y-2">
+                                    <input value={client.name} onChange={e => {
+                                        const next = [...(cfg.clients||[])]; next[idx] = { ...next[idx], name: e.target.value }; setCfg({...cfg, clients: next});
+                                    }} className="dark-input h-8 text-xs w-full" placeholder="Nombre (ej. Coca Cola)" />
+                                    <div className="flex gap-2">
+                                        <input value={client.logo_url} onChange={e => {
+                                            const next = [...(cfg.clients||[])]; next[idx] = { ...next[idx], logo_url: e.target.value }; setCfg({...cfg, clients: next});
+                                        }} className="dark-input h-8 text-xs flex-1" placeholder="URL Logo" />
+                                        <label className="cursor-pointer">
+                                            <div className="h-8 px-3 rounded bg-white/5 border border-white/10 flex items-center justify-center text-xs hover:bg-white/10">
+                                                <Upload size={12} />
+                                            </div>
+                                            <input type="file" accept="image/*" className="hidden" onChange={async e => {
+                                                const file = e.target.files?.[0]; if (!file) return;
+                                                const fd = new FormData(); fd.append("file", file); fd.append("type", "media");
+                                                const res = await fetch("/api/upload", { method: "POST", body: fd });
+                                                if (res.ok) {
+                                                    const { url } = await res.json();
+                                                    const next = [...(cfg.clients||[])]; next[idx] = { ...next[idx], logo_url: url }; setCfg({...cfg, clients: next});
+                                                }
+                                            }} />
+                                        </label>
+                                    </div>
+                                </div>
+                                {client.logo_url && <img src={client.logo_url} className="w-12 h-12 object-contain bg-black/40 rounded flex-shrink-0" alt=""/>}
+                                <button onClick={() => setCfg({...cfg, clients: cfg.clients?.filter((_, i) => i !== idx)})} className="p-2 text-white/20 hover:text-red-400">
+                                    <Trash2 size={16} />
+                                </button>
+                            </Reorder.Item>
+                        ))}
+                    </Reorder.Group>
                 </div>
             </div>
 
@@ -2140,6 +2180,34 @@ function SiteConfigAdmin({ onSave }: { onSave: (msg: string) => void }) {
                         <input value={cfg.contact_schedule || ""} onChange={e => setCfg({ ...cfg, contact_schedule: e.target.value })} className="dark-input" />
                     </div>
                 </div>
+            </div>
+
+            <div className="portal-card space-y-4">
+                <h3 className="text-sm font-semibold text-white/70">Orden de las Secciones en el Inicio</h3>
+                <p className="text-xs text-white/40 mb-2">Arrastra y suelta las secciones para cambiar su orden en la página principal.</p>
+                <Reorder.Group 
+                    axis="y" 
+                    values={cfg.home_sections_order || ["hero", "clients", "about", "process", "services", "contact"]} 
+                    onReorder={vals => setCfg({...cfg, home_sections_order: vals})} 
+                    className="space-y-2"
+                >
+                    {(cfg.home_sections_order || ["hero", "clients", "about", "process", "services", "contact"]).map(sectionId => {
+                        const nameMap: Record<string, string> = {
+                            hero: "Portada Principal (Hero)",
+                            clients: "Carrusel de Clientes",
+                            about: "Sobre Nosotros",
+                            process: "Proceso de Trabajo",
+                            services: "Servicios",
+                            contact: "Contacto y Mapa"
+                        };
+                        return (
+                            <Reorder.Item key={sectionId} value={sectionId} className="flex gap-3 items-center bg-white/5 border border-white/10 p-3 rounded-lg cursor-grab active:cursor-grabbing text-sm font-semibold text-white/80 hover:bg-white/10 transition-colors">
+                                <GripVertical size={16} className="text-white/40" />
+                                {nameMap[sectionId] || sectionId}
+                            </Reorder.Item>
+                        );
+                    })}
+                </Reorder.Group>
             </div>
 
             <button onClick={handleSave} disabled={saving} className="w-full py-3 rounded-lg bg-[#00CFFF] text-black text-sm font-bold hover:bg-[#00CFFF]/90 transition-colors disabled:opacity-50">
