@@ -2048,8 +2048,14 @@ function SiteConfigAdmin({ onSave }: { onSave: (msg: string) => void }) {
                     </div>
                 </div>
                 {cfg.logo_url && (
-                    <div className="mt-2 rounded bg-black/40 p-2 inline-block">
-                        <img src={cfg.logo_url} alt="Main Logo Preview" className="h-12 object-contain" />
+                    <div className="space-y-4">
+                        <div className="mt-2 rounded bg-black/40 p-2 inline-block">
+                            <img src={cfg.logo_url} alt="Main Logo Preview" className="object-contain" style={{ height: cfg.logo_height || 48 }} />
+                        </div>
+                        <div>
+                            <label className="text-xs text-white/40 mb-1 block font-semibold tracking-wider">TAMAÑO DEL LOGO: {cfg.logo_height || 48}px</label>
+                            <input type="range" min="20" max="150" value={cfg.logo_height || 48} onChange={e => setCfg({ ...cfg, logo_height: parseInt(e.target.value) })} className="w-full max-w-xs accent-[#00CFFF]" />
+                        </div>
                     </div>
                 )}
             </div>
@@ -2070,8 +2076,14 @@ function SiteConfigAdmin({ onSave }: { onSave: (msg: string) => void }) {
                     </label>
                 </div>
                 {cfg.hero_logo_url && (
-                    <div className="mt-2 rounded bg-black/40 p-2 inline-block">
-                        <img src={cfg.hero_logo_url} alt="Logo Preview" className="h-12 object-contain" />
+                    <div className="space-y-4">
+                        <div className="mt-2 rounded bg-black/40 p-2 inline-block">
+                            <img src={cfg.hero_logo_url} alt="Hero Logo Preview" className="object-contain" style={{ height: cfg.hero_logo_height || 96 }} />
+                        </div>
+                        <div>
+                            <label className="text-xs text-white/40 mb-1 block font-semibold tracking-wider">TAMAÑO DEL LOGO: {cfg.hero_logo_height || 96}px</label>
+                            <input type="range" min="40" max="300" value={cfg.hero_logo_height || 96} onChange={e => setCfg({ ...cfg, hero_logo_height: parseInt(e.target.value) })} className="w-full max-w-xs accent-[#00CFFF]" />
+                        </div>
                     </div>
                 )}
             </div>

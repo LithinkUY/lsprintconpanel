@@ -111,7 +111,7 @@ export default function HeroSection() {
                     {/* Logo del Hero (si existe) */}
                     {config.hero_logo_url && (
                         <div className="mb-6">
-                            <img src={config.hero_logo_url} alt="Hero Logo" className="max-h-24 md:max-h-32 object-contain" />
+                            <img src={config.hero_logo_url} alt="Hero Logo" className="object-contain" style={{ height: config.hero_logo_height || 128 }} />
                         </div>
                     )}
 

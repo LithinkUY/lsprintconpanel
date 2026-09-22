@@ -12,7 +12,7 @@ function UserLogo({ config }: { config: SiteConfig }) {
     if (config.logo_url) {
         return (
             <Link href="/" className="flex flex-col items-start leading-none">
-                <img src={config.logo_url} alt={config.logo_text || "Logo"} className="h-8 md:h-12 object-contain" />
+                <img src={config.logo_url} alt={config.logo_text || "Logo"} className="object-contain" style={{ height: config.logo_height || 48 }} />
             </Link>
         );
     }

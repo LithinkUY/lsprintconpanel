@@ -90,6 +90,7 @@ export interface SiteConfig {
     logo_colors: string[]; // ['cyan', 'magenta', 'yellow', 'white']
     logo_url?: string;        // imagen logo desktop (URL en /uploads/)
     logo_mobile_url?: string; // imagen logo mobile (URL en /uploads/)
+    logo_height?: number; // altura personalizada para logo del header
     site_favicon_url?: string; // favicon personalizado
     hero_title: string;
     hero_subtitle: string;
@@ -100,6 +101,7 @@ export interface SiteConfig {
     hero_button2_url: string;
     hero_video_url: string;
     hero_logo_url?: string;
+    hero_logo_height?: number; // Para ajustar tamaño del logo en el hero
     clients_slider_active?: boolean;
     clients_slider_title?: string;
     clients?: { id?: string; name: string; logo_url: string }[];
