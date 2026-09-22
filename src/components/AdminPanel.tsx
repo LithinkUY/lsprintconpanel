@@ -2129,7 +2129,8 @@ function SiteConfigAdmin({ onSave }: { onSave: (msg: string) => void }) {
                                     <Trash2 size={16} />
                                 </button>
                             </Reorder.Item>
-                        ))}
+                            );
+                        })}
                     </Reorder.Group>
                 </div>
             </div>
