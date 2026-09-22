@@ -29,7 +29,7 @@ import { getHeroMediaType, extractYoutubeId, getYoutubeBgEmbedUrl } from "@/lib/
 
 // ── API helpers ───────────────────────────────────────────────
 async function apiGet<T>(url: string): Promise<T> {
-    const res = await fetch(url);
+    const res = await fetch(url, { cache: "no-store" });
     if (!res.ok) {
         const errJson = await res.json().catch(() => null);
         throw new Error(errJson?.error || `GET ${url} → ${res.status}`);
