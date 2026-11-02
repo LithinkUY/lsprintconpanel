@@ -1,7 +1,8 @@
 "use client";
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import useEmblaCarousel from "embla-carousel-react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, ArrowUpRight, Layers } from "lucide-react";
 import { Service, ServiceProduct } from "@/lib/types";
 import ServiceProductModal from "./ServiceProductModal";
 
@@ -11,7 +12,7 @@ function mapApiService(r: Record<string, unknown>): Service {
         name: String(r.name ?? ""),
         description: String(r.description ?? ""),
         image_url: String(r.image_url ?? r.icon ?? ""),
-        color: String(r.color ?? "#1a2a3a"),
+        color: String(r.color ?? "#141c2b"),
         order: Number(r.sort_order ?? r.order ?? 0),
         active: r.active === true || r.active === "true",
         products: Array.isArray(r.products)
@@ -37,31 +38,60 @@ function mapApiService(r: Record<string, unknown>): Service {
     };
 }
 
-function ServiceCard({ service, onClick }: { service: Service; onClick: () => void }) {
+function ServiceCard({ service, index, onClick }: { service: Service; index: number; onClick: () => void }) {
+    const activeCount = (service.products ?? []).filter(p => p.active).length;
+
     return (
         <button
             onClick={onClick}
-            className="relative rounded-xl overflow-hidden flex-shrink-0 cursor-pointer group text-left"
-            style={{ width: "240px", height: "300px" }}
+            className="relative rounded-3xl overflow-hidden flex-shrink-0 cursor-pointer group text-left border border-white/10 hover:border-[#00CFFF]/50 transition-all duration-300 hover:-translate-y-1.5 shadow-[0_12px_32px_rgba(0,0,0,0.4)]"
+            style={{ width: "288px", height: "380px" }}
         >
+            {/* Fondo / Imagen */}
             <div
-                className="absolute inset-0 transition-transform duration-500 group-hover:scale-105"
+                className="absolute inset-0 transition-transform duration-700 group-hover:scale-110"
                 style={{
                     background: service.image_url
                         ? `url(${service.image_url}) center/cover`
-                        : service.color,
+                        : `linear-gradient(145deg, ${service.color}, #07090f)`,
                     backgroundColor: service.color,
                 }}
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-            <div className="absolute inset-0 p-4 flex flex-col justify-end">
-                <h3 className="text-white font-bold text-lg leading-tight mb-1">{service.name}</h3>
-                <p className="text-white/60 text-xs leading-relaxed line-clamp-3">{service.description}</p>
-                <span className="mt-2 inline-block text-[10px] font-bold text-[#00CFFF] bg-[#00CFFF]/10 px-2 py-0.5 rounded-full w-fit opacity-0 group-hover:opacity-100 transition-opacity">
-                    Ver productos →
+
+            {/* Velo de contraste */}
+            <div className="absolute inset-0 bg-gradient-to-t from-[#06090f] via-[#06090f]/45 to-black/15" />
+
+            {/* Top bar */}
+            <div className="absolute top-4 left-4 right-4 flex items-center justify-between z-10">
+                <span className="px-2.5 py-1 rounded-full text-[10px] font-black tracking-widest bg-black/55 backdrop-blur-md text-white/80 border border-white/10">
+                    {String(index + 1).padStart(2, "0")}
                 </span>
+                {activeCount > 0 && (
+                    <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-[#00CFFF]/15 backdrop-blur-md text-[#00CFFF] border border-[#00CFFF]/30">
+                        {activeCount} {activeCount === 1 ? "opción" : "opciones"}
+                    </span>
+                )}
             </div>
-            <div className="absolute inset-0 border border-white/0 group-hover:border-[#00CFFF]/30 rounded-xl transition-all duration-300" />
+
+            {/* Contenido inferior */}
+            <div className="absolute inset-x-0 bottom-0 p-5 flex flex-col justify-end z-10">
+                <h3 className="text-white font-black text-xl tracking-tight leading-snug mb-1.5 group-hover:text-[#00CFFF] transition-colors">
+                    {service.name}
+                </h3>
+                {service.description && (
+                    <p className="text-slate-300/75 text-xs leading-relaxed line-clamp-2 mb-4">
+                        {service.description}
+                    </p>
+                )}
+                <div className="flex items-center justify-between pt-3 border-t border-white/10">
+                    <span className="text-[11px] font-extrabold uppercase tracking-wider text-white/90 group-hover:text-[#00CFFF] transition-colors">
+                        Ver opciones y cotizar
+                    </span>
+                    <span className="w-7 h-7 rounded-full bg-white/10 group-hover:bg-[#00CFFF] text-white group-hover:text-[#04080f] flex items-center justify-center transition-all">
+                        <ArrowUpRight size={14} />
+                    </span>
+                </div>
+            </div>
         </button>
     );
 }
@@ -86,48 +116,72 @@ export default function ServicesSlider() {
 
     return (
         <>
-            <section className="py-20 bg-[#0a0a0a]">
+            <section className="relative py-24 bg-[#090d16] border-t border-white/[0.06] overflow-hidden">
                 <div className="max-w-7xl mx-auto px-6">
-                    <div className="flex items-center justify-between mb-10">
-                        <h2 className="text-2xl font-black uppercase">
-                            NUESTROS{" "}
-                            <span style={{ color: "#00CFFF" }}>SERVICIOS</span>
-                        </h2>
-                        <div className="flex gap-2">
-                            <button
-                                onClick={() => emblaApi?.scrollPrev()}
-                                className="w-9 h-9 rounded-full border border-[#2a2a2a] flex items-center justify-center text-white/60 hover:text-white hover:border-white/40 transition-all"
+                    <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
+                        <div>
+                            <span className="section-kicker mb-4">
+                                <Layers size={12} />
+                                Soluciones Gráficas
+                            </span>
+                            <h2 className="text-3xl sm:text-4xl font-black uppercase tracking-tight text-white">
+                                Nuestros <span className="brand-gradient-text">Servicios</span>
+                            </h2>
+                            <p className="text-slate-400 text-sm sm:text-base mt-2 max-w-xl">
+                                Seleccioná una categoría para ver productos disponibles, calcular medidas y cotizar al instante.
+                            </p>
+                        </div>
+
+                        <div className="flex items-center gap-3">
+                            <Link
+                                href="/pedido"
+                                className="px-4 py-2.5 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] border border-white/10 text-xs font-bold uppercase tracking-wider text-slate-200 hover:text-white transition-all"
                             >
-                                <ChevronLeft size={18} />
-                            </button>
-                            <button
-                                onClick={() => emblaApi?.scrollNext()}
-                                className="w-9 h-9 rounded-full border border-[#2a2a2a] flex items-center justify-center text-white/60 hover:text-white hover:border-white/40 transition-all"
-                            >
-                                <ChevronRight size={18} />
-                            </button>
+                                Ver catálogo completo →
+                            </Link>
+                            <div className="flex gap-2">
+                                <button
+                                    onClick={() => emblaApi?.scrollPrev()}
+                                    aria-label="Anterior"
+                                    className="w-10 h-10 rounded-xl bg-[#0d121c] border border-white/10 flex items-center justify-center text-slate-300 hover:text-white hover:border-[#00CFFF]/50 transition-all"
+                                >
+                                    <ChevronLeft size={18} />
+                                </button>
+                                <button
+                                    onClick={() => emblaApi?.scrollNext()}
+                                    aria-label="Siguiente"
+                                    className="w-10 h-10 rounded-xl bg-[#0d121c] border border-white/10 flex items-center justify-center text-slate-300 hover:text-white hover:border-[#00CFFF]/50 transition-all"
+                                >
+                                    <ChevronRight size={18} />
+                                </button>
+                            </div>
                         </div>
                     </div>
 
                     {loading && (
-                        <div className="flex gap-4">
-                            {[...Array(5)].map((_, i) => (
-                                <div key={i} className="flex-shrink-0 rounded-xl bg-[#1a1a1a] animate-pulse" style={{ width: 240, height: 300 }} />
+                        <div className="flex gap-5 overflow-hidden">
+                            {[...Array(4)].map((_, i) => (
+                                <div
+                                    key={i}
+                                    className="flex-shrink-0 rounded-3xl bg-[#111827] border border-white/5 animate-pulse"
+                                    style={{ width: 288, height: 380 }}
+                                />
                             ))}
                         </div>
                     )}
 
                     {!loading && active.length === 0 && (
-                        <p className="text-white/30 text-sm py-10">No hay servicios activos configurados.</p>
+                        <p className="text-slate-500 text-sm py-10">No hay servicios activos configurados.</p>
                     )}
 
                     {!loading && active.length > 0 && (
-                        <div className="overflow-hidden" ref={emblaRef}>
-                            <div className="flex gap-4">
-                                {active.map(service => (
+                        <div className="overflow-hidden py-2 -my-2" ref={emblaRef}>
+                            <div className="flex gap-5">
+                                {active.map((service, idx) => (
                                     <ServiceCard
                                         key={service.id}
                                         service={service}
+                                        index={idx}
                                         onClick={() => setSelectedService(service)}
                                     />
                                 ))}

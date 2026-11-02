@@ -4,17 +4,23 @@
   --cyan: #00cfff;
   --magenta: #e91e8c;
   --yellow: #ffe000;
-  --bg: #0a0a0a;
-  --bg2: #111111;
-  --bg3: #1a1a1a;
-  --border: #2a2a2a;
-  --text: #ffffff;
-  --text-muted: #888888;
+  --bg: #07090f;
+  --bg2: #0d121c;
+  --bg3: #141c2b;
+  --border: #222c40;
+  --text: #f8fafc;
+  --text-muted: #94a3b8;
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 body {
   background-color: var(--bg);
   color: var(--text);
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  -webkit-font-smoothing: antialiased;
 }
 
 ::-webkit-scrollbar {
@@ -28,7 +34,11 @@ body {
 
 ::-webkit-scrollbar-thumb {
   background: var(--border);
-  border-radius: 3px;
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #334155;
 }
 
 @keyframes printerSweep {
@@ -86,27 +96,59 @@ body {
   background-clip: text;
 }
 
+/* Studio aesthetic surfaces */
+.studio-grid-bg {
+  background-image:
+    linear-gradient(to right, rgba(255, 255, 255, 0.028) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.028) 1px, transparent 1px);
+  background-size: 44px 44px;
+}
+
+.glass-panel {
+  background: rgba(13, 18, 28, 0.72);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.section-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: #00cfff;
+  background: rgba(0, 207, 255, 0.08);
+  border: 1px solid rgba(0, 207, 255, 0.22);
+}
+
+/* Admin & shared controls */
 .portal-card {
   background: var(--bg2);
   border: 1px solid var(--border);
-  border-radius: 12px;
+  border-radius: 14px;
   padding: 20px;
 }
 
 .dark-input {
   background: var(--bg3);
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: 10px;
   color: var(--text);
   padding: 10px 14px;
   width: 100%;
   font-size: 14px;
   outline: none;
-  transition: border-color 0.2s;
+  transition: border-color 0.2s, box-shadow 0.2s;
 }
 
 .dark-input:focus {
   border-color: var(--cyan);
+  box-shadow: 0 0 0 3px rgba(0, 207, 255, 0.12);
 }
 
 .sidebar-item {
@@ -137,7 +179,7 @@ body {
   display: block;
   font-size: 10px;
   font-weight: 600;
-  color: rgba(255, 255, 255, 0.4);
+  color: rgba(255, 255, 255, 0.45);
   text-transform: uppercase;
   letter-spacing: 0.1em;
   margin-bottom: 4px;

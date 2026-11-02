@@ -3,7 +3,7 @@ import { headers } from "next/headers";
 
 export default async function robots(): Promise<MetadataRoute.Robots> {
     const headersList = await headers();
-    const host = headersList.get("host") || "lsprintuy.com";
+    const host = headersList.get("host") || "www.lsprint.uy";
     const protocol = process.env.NODE_ENV === "development" || host.includes("localhost") ? "http" : "https";
     const baseUrl = `${protocol}://${host}`;
 
@@ -11,7 +11,7 @@ export default async function robots(): Promise<MetadataRoute.Robots> {
         rules: {
             userAgent: "*",
             allow: "/",
-            disallow: ["/admin", "/api/", "/portal", "/checkout", "/pedido", "/proceso"],
+            disallow: ["/admin", "/api/", "/portal", "/checkout"],
         },
         sitemap: `${baseUrl}/sitemap.xml`,
     };

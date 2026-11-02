@@ -4032,7 +4032,7 @@ export default function AdminPanel() {
             <aside className="w-60 flex-shrink-0 bg-[#0d0d0d] border-r border-[#1a1a1a] flex flex-col overflow-y-auto">
                 <div className="p-5 border-b border-[#1a1a1a] flex-shrink-0">
                     <div className="flex flex-col leading-none">
-                        <span className="text-2xl font-black italic text-white">user</span>
+                        <span className="text-2xl font-black italic text-white">Lsprint</span>
                         <div className="flex gap-[3px] mt-[2px]">
                             {["#00CFFF", "#E91E8C", "#FFE000", "#FFFFFF"].map((c, i) => (
                                 <div key={i} className="h-[3px] w-[12px] rounded-sm" style={{ backgroundColor: c }} />
@@ -4053,8 +4053,7 @@ export default function AdminPanel() {
                     ))}
                 </nav>
                 <div className="p-4 border-t border-[#1a1a1a] flex-shrink-0">
-                    <a href="/" className="sidebar-item w-full text-left text-[#00CFFF]/70 hover:text-[#00CFFF] flex items-center gap-3"><Eye size={14} /><span>Ver Sitio Publico</span></a>
-                    <a href="/portal" className="sidebar-item w-full text-left text-white/30 hover:text-white/60 flex items-center gap-3 mt-1"><Users size={14} /><span>Ver Portal Usuario</span></a>
+                    <a href="/" className="sidebar-item w-full text-left text-[#00CFFF]/70 hover:text-[#00CFFF] flex items-center gap-3"><Eye size={14} /><span>Ver Sitio Público</span></a>
                 </div>
             </aside>
 

@@ -1,8 +1,8 @@
-// Datos de muestra (mock) para desarrollo sin Supabase aún
+// Datos de muestra (mock) para desarrollo sin base de datos
 import { SiteConfig, Service, Order, Client, PendingPayment, Page, GalleryConfig } from "./types";
 
 export const mockSiteConfig: SiteConfig = {
-    logo_text: "",
+    logo_text: "Lsprint",
     logo_colors: ["#00CFFF", "#E91E8C", "#FFE000", "#FFFFFF"],
     hero_title: "INDUSTRIALIZAMOS\nTU PRODUCCIÓN",
     hero_subtitle: "CORTE LÁSER",
@@ -16,7 +16,7 @@ export const mockSiteConfig: SiteConfig = {
     hero_button1_text: "Hacé tu pedido aquí →",
     hero_button1_url: "/pedido",
     hero_button2_text: "Solicitar cotización →",
-    hero_button2_url: "/cotizacion",
+    hero_button2_url: "/contacto",
     hero_video_url: "/video/hero.mp4",
     hero_logo_url: "",
     clients_slider_active: true,
@@ -29,38 +29,21 @@ export const mockSiteConfig: SiteConfig = {
     ],
     about_active: true,
     about_title: "Sobre Nosotros",
-    about_text: "<p>Somos una imprenta con años de experiencia, brindando soluciones gráficas de alta calidad.</p>",
+    about_text: "<p>Somos una imprenta con años de experiencia, brindando soluciones gráficas de alta calidad para empresas, comercios y emprendimientos en todo Uruguay.</p>",
     about_image_url: "https://placehold.co/600x400?text=Empresa",
     map_active: true,
     map_title: "Nuestra Ubicación",
     map_embed_url: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3272.24785461123!2d-56.1852!3d-34.9056!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMzTCsDU0JzIwLjIiUyA1NsKwMTEnMDYuNyJX!5e0!3m2!1ses!2suy!4v1611234567890",
     contact_active: true,
     contact_title: "Contacto",
-    contact_address: "Av. Siempre Viva 123, Montevideo",
-    contact_phone: "+598 99 123 456",
-    contact_email: "hola@lsprint.uy",
+    contact_address: "Montevideo, Uruguay",
+    contact_phone: "093 811 948",
+    contact_email: "info@lsprint.uy",
     contact_schedule: "Lunes a Viernes 09:00 - 18:00",
-    home_sections_order: ["hero", "clients", "about", "process", "services", "contact"],
+    home_sections_order: ["hero", "about", "services", "process", "clients", "contact"],
     nav_items: [
-        { label: "RETIRÁ AQUÍ", href: "/retiro" },
         { label: "HACÉ TU PEDIDO", href: "/pedido" },
         { label: "GALERÍA", href: "/galeria" },
-        {
-            label: "RECURSOS",
-            href: "#",
-            children: [
-                { label: "Guías", href: "/recursos/guias" },
-                { label: "Templates", href: "/recursos/templates" },
-            ],
-        },
-        {
-            label: "MI PORTAL",
-            href: "#",
-            children: [
-                { label: "Autogestión", href: "/portal" },
-                { label: "Mis Pedidos", href: "/portal/pedidos" },
-            ],
-        },
         { label: "CONTACTO", href: "/contacto" },
     ],
     primary_color: "#00CFFF",
@@ -107,7 +90,7 @@ export const mockServices: Service[] = [
         ]
     },
     {
-        id: "7", name: "DTF TextII", description: "Estampado vibrante sin límites de diseño. Fullcolor en cualquier tela, sin límites de diseño.", image_url: "/img/services/dtf.jpg", color: "#4a3a1a", order: 7, active: true,
+        id: "7", name: "DTF Textil", description: "Estampado vibrante sin límites de diseño. Full color en cualquier tela, alta elasticidad y durabilidad.", image_url: "/img/services/dtf.jpg", color: "#4a3a1a", order: 7, active: true,
         products: [
             { id: "p7-1", service_id: "7", name: "Transfer DTF A4", description: "Transfer DTF listo para aplicar. Formato A4.", price: 1.5, unit: "unidad", active: true, order: 1, details: [{ label: "Formato", value: "A4 (21x29.7 cm)" }, { label: "Aplicación", value: "Heat press 160°C / 10s" }] },
             { id: "p7-2", service_id: "7", name: "Transfer DTF A3", description: "Transfer DTF listo para aplicar. Formato A3.", price: 2.8, unit: "unidad", active: true, order: 2, details: [{ label: "Formato", value: "A3 (29.7x42 cm)" }, { label: "Aplicación", value: "Heat press 160°C / 10s" }] },
@@ -118,8 +101,8 @@ export const mockServices: Service[] = [
 export const mockClient: Client = {
     id: "1",
     name: "Ruben Gomez",
-    email: "lsprinturuguay@gmail.com",
-    phone: "98360725",
+    email: "info@lsprint.uy",
+    phone: "093811948",
     address: ".",
     client_code: "lsprintuy",
     advisor: undefined,
@@ -140,9 +123,9 @@ export const mockPayments: PendingPayment[] = [
 ];
 
 export const mockPages: Page[] = [
-    { id: "pg1", title: "Cómo hacer tu pedido", slug: "como-pedir", content: "# Cómo hacer tu pedido\n\nSeguí estos pasos para realizar tu pedido de forma rápida y sencilla...", active: true, show_in_menu: true, created_at: "2026-01-01", updated_at: "2026-01-01" },
-    { id: "pg2", title: "Preguntas frecuentes", slug: "faq", content: "# Preguntas frecuentes\n\n**¿Cuáles son los tiempos de entrega?**\nDepende del tipo de trabajo...", active: true, show_in_menu: false, created_at: "2026-01-01", updated_at: "2026-01-01" },
-    { id: "pg3", title: "Contacto", slug: "contacto", content: "# Contacto\n\nPodés contactarnos por WhatsApp o email.", active: true, show_in_menu: true, created_at: "2026-01-01", updated_at: "2026-01-01" },
+    { id: "pg1", title: "Cómo hacer tu pedido", slug: "como-pedir", content: "<p>Seguí estos pasos para realizar tu pedido de forma rápida y sencilla desde nuestro catálogo online.</p>", active: true, show_in_menu: true, created_at: "2026-01-01", updated_at: "2026-01-01" },
+    { id: "pg2", title: "Preguntas frecuentes", slug: "faq", content: "<p><strong>¿Cuáles son los tiempos de entrega?</strong><br/>Depende del tipo de trabajo y volumen, coordinamos cada entrega a medida.</p>", active: true, show_in_menu: false, created_at: "2026-01-01", updated_at: "2026-01-01" },
+    { id: "pg3", title: "Contacto", slug: "contacto", content: "<p>Estamos para asesorarte en tu próximo proyecto gráfico. Escribinos por WhatsApp, correo electrónico o visitanos en nuestro taller.</p>", active: true, show_in_menu: true, created_at: "2026-01-01", updated_at: "2026-01-01" },
 ];
 
 export const mockGallery: GalleryConfig = {

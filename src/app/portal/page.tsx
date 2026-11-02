@@ -1,10 +1,5 @@
-import { Suspense } from "react";
-import UserPortal from "@/components/UserPortal";
+import { redirect } from "next/navigation";
 
 export default function PortalPage() {
-    return (
-        <Suspense>
-            <UserPortal />
-        </Suspense>
-    );
+    redirect("/");
 }

@@ -2,11 +2,11 @@ import type { Metadata } from "next";
 import "./globals.css";
 import Header from "@/components/Header";
 import { sql } from "@/lib/db";
-import { defaultSeoConfig, SeoConfig } from "@/lib/types";
+import { defaultSeoConfig } from "@/lib/types";
 import Script from "next/script";
 import SprintChat from "@/components/SprintChat";
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata(): Promise<Metadata> {
   let seo = defaultSeoConfig;
@@ -20,7 +20,7 @@ export async function generateMetadata(): Promise<Metadata> {
   }
 
   return {
-    metadataBase: new URL("https://lsprintuy.com"),
+    metadataBase: new URL("https://www.lsprint.uy"),
     title: {
       default: seo.meta_title,
       template: "%s | " + (seo.meta_title.split("|")[0]?.trim() || "Lsprint"),
@@ -36,12 +36,12 @@ export async function generateMetadata(): Promise<Metadata> {
       siteName: seo.meta_title.split("|")[0]?.trim() || "Lsprint",
       images: [
         {
-          url: "https://lsprintuy.com/og-image.jpg", // Idealmente reemplazar por el logo
+          url: "https://www.lsprint.uy/og-image.jpg",
           width: 1200,
           height: 630,
           alt: seo.meta_title,
-        }
-      ]
+        },
+      ],
     },
     twitter: {
       card: "summary_large_image",
@@ -58,7 +58,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     if (rows && rows[0] && rows[0].value) {
       seo = { ...defaultSeoConfig, ...rows[0].value };
     }
-  } catch (e) {}
+  } catch {}
 
   return (
     <html lang="es">
@@ -93,9 +93,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           </Script>
         )}
       </head>
-      <body>
+      <body className="min-h-screen bg-[#07090f] text-slate-50 selection:bg-[#00CFFF]/30 selection:text-white">
         <Header />
-        <main>{children}</main>
+        <div>{children}</div>
         <SprintChat />
       </body>
     </html>

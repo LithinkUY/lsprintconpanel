@@ -1,294 +1,241 @@
 "use client";
-import { useState, useEffect, useRef } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
+import { usePathname } from "next/navigation";
 import Link from "next/link";
-import { ChevronDown, Menu, X, User, LogOut, ShoppingBag, UserCircle } from "lucide-react";
+import { ChevronDown, Menu, X, ArrowUpRight, Sparkles } from "lucide-react";
 import { NavItem, SiteConfig } from "@/lib/types";
 import { mockSiteConfig } from "@/lib/mock-data";
-import AuthModal, { PortalSession } from "@/components/AuthModal";
 
-// Logo USER con colores CMYK o Imagen
-function UserLogo({ config }: { config: SiteConfig }) {
+function BrandLogo({ config }: { config: SiteConfig }) {
     if (config.logo_url) {
         return (
-            <Link href="/" className="flex flex-col items-start leading-none">
-                <img src={config.logo_url} alt={config.logo_text || "Logo"} className="object-contain" style={{ height: config.logo_height || 48 }} />
+            <Link href="/" className="flex items-center leading-none group">
+                <img
+                    src={config.logo_url}
+                    alt={config.logo_text || "Lsprint"}
+                    className="object-contain transition-transform duration-300 group-hover:scale-[1.03]"
+                    style={{ height: config.logo_height || 44 }}
+                />
             </Link>
         );
     }
 
     const [c, m, y, w] = config.logo_colors || ["#00CFFF", "#E91E8C", "#FFE000", "#FFFFFF"];
     return (
-        <Link href="/" className="flex flex-col items-start leading-none">
-            <span className="text-3xl font-black tracking-tighter text-white" style={{ fontStyle: "italic" }}>
-                {config.logo_text}
+        <Link href="/" className="flex flex-col items-start leading-none group">
+            <span className="text-2xl sm:text-3xl font-black tracking-tighter text-white italic">
+                {config.logo_text || "Lsprint"}
             </span>
-            <div className="flex gap-[3px] mt-[2px]">
+            <div className="flex gap-[3px] mt-[3px]">
                 {[c, m, y, w].map((color, i) => (
-                    <div key={i} className="h-[4px] w-[14px] rounded-sm" style={{ backgroundColor: color }} />
+                    <div key={i} className="h-[3.5px] w-[13px] rounded-full" style={{ backgroundColor: color }} />
                 ))}
             </div>
         </Link>
     );
 }
 
-// Barras CMYK que aparecen al hacer hover
-function CmykUnderline({ visible }: { visible: boolean }) {
-    const colors = ["#00CFFF", "#E91E8C", "#FFE000", "#444"];
-    return (
-        <div className="absolute -bottom-[5px] left-0 right-0 flex gap-[2px]">
-            {colors.map((color, i) => (
-                <div
-                    key={i}
-                    className="h-[3px] flex-1 rounded-full"
-                    style={{
-                        backgroundColor: color,
-                        transform: visible ? "scaleX(1)" : "scaleX(0)",
-                        transformOrigin: "left center",
-                        transition: `transform 0.22s cubic-bezier(0.4,0,0.2,1) ${i * 40}ms`,
-                    }}
-                />
-            ))}
-        </div>
-    );
-}
-
-function NavItemComponent({ item }: { item: NavItem }) {
+function NavItemComponent({ item, active }: { item: NavItem; active: boolean }) {
     const [open, setOpen] = useState(false);
-    const [hovered, setHovered] = useState(false);
 
-    if (!item.children) {
+    const cleanChildren = item.children?.filter(
+        c => !c.href.startsWith("/portal") && !c.label.toUpperCase().includes("PORTAL")
+    );
+
+    if (!cleanChildren || cleanChildren.length === 0) {
         return (
             <Link
                 href={item.href}
-                className="relative text-sm font-medium text-white/80 hover:text-white transition-colors whitespace-nowrap pb-1"
-                onMouseEnter={() => setHovered(true)}
-                onMouseLeave={() => setHovered(false)}
+                className={`relative px-3.5 py-2 rounded-xl text-xs font-bold tracking-wider uppercase transition-all whitespace-nowrap ${
+                    active
+                        ? "text-[#00CFFF] bg-[#00CFFF]/10"
+                        : "text-slate-300 hover:text-white hover:bg-white/[0.06]"
+                }`}
             >
                 {item.label}
-                <CmykUnderline visible={hovered} />
+                {active && (
+                    <span className="absolute bottom-1 left-3.5 right-3.5 h-[2px] rounded-full bg-gradient-to-r from-[#00CFFF] to-[#E91E8C]" />
+                )}
             </Link>
         );
     }
+
     return (
         <div
             className="relative"
-            onMouseEnter={() => { setOpen(true); setHovered(true); }}
-            onMouseLeave={() => { setOpen(false); setHovered(false); }}
+            onMouseEnter={() => setOpen(true)}
+            onMouseLeave={() => setOpen(false)}
         >
-            <button className="relative flex items-center gap-1 text-sm font-medium text-white/80 hover:text-white transition-colors pb-1">
-                {item.label} <ChevronDown size={14} />
-                <CmykUnderline visible={hovered} />
+            <button className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold tracking-wider uppercase text-slate-300 hover:text-white hover:bg-white/[0.06] transition-all">
+                {item.label}
+                <ChevronDown size={13} className={`transition-transform duration-200 ${open ? "rotate-180" : ""}`} />
             </button>
             {open && (
-                <div className="absolute top-full left-0 mt-2 bg-[#1a1a1a] border border-[#2a2a2a] rounded-lg py-1 min-w-[160px] z-50 shadow-xl">
-                    {item.children.map((child) => (
-                        <Link key={child.href} href={child.href} className="block px-4 py-2 text-sm text-white/70 hover:text-white hover:bg-white/5 transition-colors">
-                            {child.label}
-                        </Link>
-                    ))}
+                <div className="absolute top-full left-0 pt-2 z-50 min-w-[190px]">
+                    <div className="bg-[#0d121c]/95 backdrop-blur-xl border border-white/10 rounded-2xl py-2 shadow-2xl">
+                        {cleanChildren.map((child) => (
+                            <Link
+                                key={child.href}
+                                href={child.href}
+                                className="block px-4 py-2.5 text-xs font-semibold text-slate-300 hover:text-[#00CFFF] hover:bg-white/[0.05] transition-colors"
+                            >
+                                {child.label}
+                            </Link>
+                        ))}
+                    </div>
                 </div>
             )}
         </div>
     );
 }
 
-function RetiraButton({ label, session, onAuth, onNavigate }: { label: string; session: PortalSession | null; onAuth: () => void; onNavigate: () => void }) {
-    const [hovered, setHovered] = useState(false);
-    return (
-        <button
-            className="relative text-sm font-medium text-white/80 hover:text-white transition-colors whitespace-nowrap pb-1"
-            onMouseEnter={() => setHovered(true)}
-            onMouseLeave={() => setHovered(false)}
-            onClick={() => session ? onNavigate() : onAuth()}
-        >
-            {label}
-            <CmykUnderline visible={hovered} />
-        </button>
-    );
-}
-
 export default function Header() {
-    const router = useRouter();
+    const pathname = usePathname();
     const [config, setConfig] = useState<SiteConfig>(mockSiteConfig);
     const [mobileOpen, setMobileOpen] = useState(false);
-    const [session, setSession] = useState<PortalSession | null>(null);
-    const [authOpen, setAuthOpen] = useState(false);
-    const [authTab, setAuthTab] = useState<"login" | "register">("login");
-    const [portalOpen, setPortalOpen] = useState(false);
-    const portalRef = useRef<HTMLDivElement>(null);
+    const [scrolled, setScrolled] = useState(false);
 
     useEffect(() => {
         fetch("/api/config?key=siteconfig")
             .then(r => r.json())
             .then(val => {
                 if (val && typeof val === "object") {
-                    const merged = { ...mockSiteConfig, ...val };
-                    setConfig(merged);
-                    if (merged.logo_text) {
-                        document.title = `${merged.logo_text} | Autogestión`;
-                    }
+                    setConfig({ ...mockSiteConfig, ...val });
                 }
             })
-            .catch(() => { });
-
-        // Restore session from localStorage
-        try {
-            const raw = localStorage.getItem("portal_session");
-            if (raw) setSession(JSON.parse(raw));
-        } catch { /* ignore */ }
+            .catch(() => {});
     }, []);
 
-    // Close portal dropdown on outside click
     useEffect(() => {
-        const handler = (e: MouseEvent) => {
-            if (portalRef.current && !portalRef.current.contains(e.target as Node)) {
-                setPortalOpen(false);
-            }
-        };
-        document.addEventListener("mousedown", handler);
-        return () => document.removeEventListener("mousedown", handler);
+        const onScroll = () => setScrolled(window.scrollY > 18);
+        onScroll();
+        window.addEventListener("scroll", onScroll, { passive: true });
+        return () => window.removeEventListener("scroll", onScroll);
     }, []);
 
-    const logout = () => {
-        localStorage.removeItem("portal_session");
-        setSession(null);
-        setPortalOpen(false);
-    };
+    // Ocultar Header público en rutas administrativas, visor privado y checkout
+    if (
+        pathname?.startsWith("/admin") ||
+        pathname?.startsWith("/muestra") ||
+        pathname?.startsWith("/checkout")
+    ) {
+        return null;
+    }
 
-    const openAuth = (tab: "login" | "register") => {
-        setAuthTab(tab);
-        setAuthOpen(true);
-        setMobileOpen(false);
-    };
+    // Filtrar cualquier enlace heredado al portal de clientes o retiro con sesión
+    const publicNavItems = (config.nav_items || []).filter((item) => {
+        const upper = item.label.toUpperCase();
+        if (upper.includes("PORTAL") || upper.includes("INICIAR") || upper.includes("REGISTR")) return false;
+        if (item.href?.startsWith("/portal") || item.href === "/retiro") return false;
+        return true;
+    });
 
-    const mainNav = config.nav_items.filter((n) => n.label !== "HACÉ TU PEDIDO");
-    const ctaBtn = config.nav_items.find((n) => n.label === "HACÉ TU PEDIDO");
+    const ctaBtn =
+        publicNavItems.find((n) => n.label.toUpperCase().includes("PEDIDO") || n.href === "/pedido") ?? {
+            label: "HACÉ TU PEDIDO",
+            href: "/pedido",
+        };
+
+    const mainNav = publicNavItems.filter((n) => n !== ctaBtn);
 
     return (
-        <>
-            <header className="fixed top-0 left-0 right-0 z-50 bg-black/80 backdrop-blur-md border-b border-white/5">
-                <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between gap-6">
-                    <UserLogo config={config} />
+        <header className="fixed top-0 left-0 right-0 z-50 px-3 sm:px-6 pt-3 transition-all duration-300">
+            <div
+                className={`max-w-7xl mx-auto rounded-2xl transition-all duration-300 ${
+                    scrolled
+                        ? "bg-[#0a0f18]/90 backdrop-blur-xl border border-white/12 shadow-[0_12px_40px_rgba(0,0,0,0.55)]"
+                        : "bg-[#0a0f18]/70 backdrop-blur-md border border-white/[0.08]"
+                }`}
+            >
+                <div className="px-4 sm:px-6 h-16 flex items-center justify-between gap-6">
+                    <BrandLogo config={config} />
 
-                    {/* Desktop nav */}
-                    <nav className="hidden lg:flex items-center gap-6">
-                        {mainNav.map((item) => {
-                            const isRetira = item.label.toUpperCase().includes("RETIR");
-                            if (isRetira) {
-                                return (
-                                    <RetiraButton key={item.label} label={item.label} session={session} onAuth={() => openAuth("login")} onNavigate={() => router.push("/portal?section=retiro")} />
-                                );
-                            }
-                            return <NavItemComponent key={item.label} item={item} />;
-                        })}
-                        {ctaBtn && (
-                            <Link href={ctaBtn.href} className="px-4 py-2 text-sm font-semibold border border-white rounded-full hover:bg-white hover:text-black transition-all whitespace-nowrap">
-                                {ctaBtn.label}
-                            </Link>
-                        )}
+                    {/* Navegación Desktop */}
+                    <nav className="hidden lg:flex items-center gap-1.5">
+                        <Link
+                            href="/"
+                            className={`relative px-3.5 py-2 rounded-xl text-xs font-bold tracking-wider uppercase transition-all ${
+                                pathname === "/"
+                                    ? "text-[#00CFFF] bg-[#00CFFF]/10"
+                                    : "text-slate-300 hover:text-white hover:bg-white/[0.06]"
+                            }`}
+                        >
+                            Inicio
+                            {pathname === "/" && (
+                                <span className="absolute bottom-1 left-3.5 right-3.5 h-[2px] rounded-full bg-gradient-to-r from-[#00CFFF] to-[#E91E8C]" />
+                            )}
+                        </Link>
+                        {mainNav.map((item) => (
+                            <NavItemComponent
+                                key={item.label}
+                                item={item}
+                                active={pathname === item.href}
+                            />
+                        ))}
                     </nav>
 
-                    {/* Auth area - desktop */}
+                    {/* Acción principal Desktop (sin inicio de sesión de clientes) */}
                     <div className="hidden lg:flex items-center gap-3">
-                        {session ? (
-                            <div className="relative" ref={portalRef}>
-                                <button onClick={() => setPortalOpen(p => !p)}
-                                    className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white/5 hover:bg-white/10 transition-colors text-sm text-white font-medium">
-                                    <UserCircle size={18} className="text-[#00CFFF]" />
-                                    Mi Portal
-                                    <ChevronDown size={14} className={`transition-transform ${portalOpen ? "rotate-180" : ""}`} />
-                                </button>
-                                {portalOpen && (
-                                    <div className="absolute right-0 top-full mt-2 bg-[#1a1a1a] border border-[#2a2a2a] rounded-xl py-1 min-w-[180px] z-50 shadow-2xl">
-                                        <div className="px-4 py-2.5 border-b border-[#2a2a2a]">
-                                            <p className="text-xs font-semibold text-white">{session.name}</p>
-                                            <p className="text-[10px] text-white/30 mt-0.5">{session.email}</p>
-                                        </div>
-                                        <Link href="/portal?section=historial" onClick={() => setPortalOpen(false)}
-                                            className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-white/70 hover:text-white hover:bg-white/5 transition-colors">
-                                            <ShoppingBag size={14} /> Mis Pedidos
-                                        </Link>
-                                        <Link href="/portal?section=perfil" onClick={() => setPortalOpen(false)}
-                                            className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-white/70 hover:text-white hover:bg-white/5 transition-colors">
-                                            <User size={14} /> Mi Cuenta
-                                        </Link>
-                                        <Link href="/portal?section=retiro" onClick={() => setPortalOpen(false)}
-                                            className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-white/70 hover:text-white hover:bg-white/5 transition-colors">
-                                            <ShoppingBag size={14} /> Retiro de Pedidos
-                                        </Link>
-                                        <div className="border-t border-[#2a2a2a] mt-1 pt-1">
-                                            <button onClick={logout}
-                                                className="flex items-center gap-2.5 w-full px-4 py-2.5 text-sm text-red-400 hover:text-red-300 hover:bg-white/5 transition-colors">
-                                                <LogOut size={14} /> Cerrar Sesión
-                                            </button>
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-                        ) : (
-                            <>
-                                <button onClick={() => openAuth("login")}
-                                    className="px-4 py-2 text-sm font-medium text-white/70 hover:text-white transition-colors">
-                                    Iniciar sesión
-                                </button>
-                                <button onClick={() => openAuth("register")}
-                                    className="px-4 py-2 text-sm font-semibold rounded-full text-black"
-                                    style={{ background: "linear-gradient(90deg,#00CFFF,#E91E8C)" }}>
-                                    Registrarse
-                                </button>
-                            </>
-                        )}
+                        <Link
+                            href={ctaBtn.href}
+                            className="group inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-black tracking-wider uppercase text-[#04080f] bg-gradient-to-r from-[#00CFFF] via-[#38dcff] to-[#00CFFF] shadow-[0_0_24px_rgba(0,207,255,0.3)] hover:shadow-[0_0_32px_rgba(0,207,255,0.5)] hover:-translate-y-0.5 transition-all"
+                        >
+                            <Sparkles size={14} className="text-[#04080f]" />
+                            <span>{ctaBtn.label}</span>
+                            <ArrowUpRight size={15} className="transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                        </Link>
                     </div>
 
-                    {/* Mobile toggle */}
-                    <button className="lg:hidden text-white" onClick={() => setMobileOpen(!mobileOpen)}>
-                        {mobileOpen ? <X size={24} /> : <Menu size={24} />}
+                    {/* Botón Menú Móvil */}
+                    <button
+                        className="lg:hidden w-10 h-10 rounded-xl bg-white/[0.05] border border-white/10 flex items-center justify-center text-white hover:bg-white/10 transition-colors"
+                        onClick={() => setMobileOpen(!mobileOpen)}
+                        aria-label="Abrir menú"
+                    >
+                        {mobileOpen ? <X size={20} /> : <Menu size={20} />}
                     </button>
                 </div>
 
-                {/* Mobile menu */}
+                {/* Línea sutil CMYK inferior */}
+                <div className="h-[1px] w-full bg-gradient-to-r from-transparent via-[#00CFFF]/35 to-transparent" />
+
+                {/* Menú Móvil */}
                 {mobileOpen && (
-                    <div className="lg:hidden bg-[#111] border-t border-[#2a2a2a] px-4 py-4 flex flex-col gap-3">
-                        {config.nav_items.map((item) => {
-                            const isRetira = item.label.toUpperCase().includes("RETIR");
-                            if (isRetira) {
-                                return (
-                                    <button key={item.label} onClick={() => { setMobileOpen(false); if (session) router.push("/portal?section=retiro"); else openAuth("login"); }} className="text-left text-sm text-white/80 hover:text-white py-1">
-                                        {item.label}
-                                    </button>
-                                );
-                            }
-                            return (
-                                <Link key={item.label} href={item.href} className="text-sm text-white/80 hover:text-white py-1" onClick={() => setMobileOpen(false)}>
-                                    {item.label}
-                                </Link>
-                            );
-                        })}
-                        <div className="border-t border-[#2a2a2a] pt-3 flex flex-col gap-2">
-                            {session ? (
-                                <>
-                                    <Link href="/portal?section=historial" className="text-sm text-white/70 py-1" onClick={() => setMobileOpen(false)}>Mis Pedidos</Link>
-                                    <Link href="/portal?section=perfil" className="text-sm text-white/70 py-1" onClick={() => setMobileOpen(false)}>Mi Cuenta</Link>
-                                    <button onClick={logout} className="text-left text-sm text-red-400 py-1">Cerrar Sesión</button>
-                                </>
-                            ) : (
-                                <>
-                                    <button onClick={() => openAuth("login")} className="text-sm text-white/70 py-1 text-left">Iniciar sesión</button>
-                                    <button onClick={() => openAuth("register")} className="text-sm text-[#00CFFF] py-1 text-left font-semibold">Registrarse</button>
-                                </>
-                            )}
+                    <div className="lg:hidden px-4 py-4 border-t border-white/10 flex flex-col gap-1.5 bg-[#0a0f18]/95 rounded-b-2xl">
+                        <Link
+                            href="/"
+                            onClick={() => setMobileOpen(false)}
+                            className={`px-3.5 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider ${
+                                pathname === "/" ? "bg-[#00CFFF]/10 text-[#00CFFF]" : "text-slate-200 hover:bg-white/5"
+                            }`}
+                        >
+                            Inicio
+                        </Link>
+                        {mainNav.map((item) => (
+                            <Link
+                                key={item.label}
+                                href={item.href}
+                                onClick={() => setMobileOpen(false)}
+                                className={`px-3.5 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider ${
+                                    pathname === item.href ? "bg-[#00CFFF]/10 text-[#00CFFF]" : "text-slate-200 hover:bg-white/5"
+                                }`}
+                            >
+                                {item.label}
+                            </Link>
+                        ))}
+                        <div className="pt-2 mt-1 border-t border-white/10">
+                            <Link
+                                href={ctaBtn.href}
+                                onClick={() => setMobileOpen(false)}
+                                className="w-full flex items-center justify-center gap-2 py-3 rounded-xl text-xs font-black uppercase tracking-wider text-[#04080f] bg-[#00CFFF] shadow-[0_0_20px_rgba(0,207,255,0.25)]"
+                            >
+                                {ctaBtn.label}
+                                <ArrowUpRight size={15} />
+                            </Link>
                         </div>
                     </div>
                 )}
-            </header>
-
-            <AuthModal
-                open={authOpen}
-                initialTab={authTab}
-                onClose={() => setAuthOpen(false)}
-                onSuccess={(s) => setSession(s)}
-            />
-        </>
+            </div>
+        </header>
     );
 }

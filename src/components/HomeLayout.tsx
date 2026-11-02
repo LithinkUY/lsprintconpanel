@@ -16,7 +16,7 @@ export default function HomeLayout() {
     useEffect(() => {
         fetch("/api/config?key=siteconfig")
             .then(r => r.json())
-            .then(val => { 
+            .then(val => {
                 if (val && typeof val === "object") {
                     setConfig({ ...mockSiteConfig, ...val });
                 }
@@ -25,12 +25,12 @@ export default function HomeLayout() {
             .finally(() => setLoading(false));
     }, []);
 
-    if (loading) return <div className="min-h-screen bg-[#0a0a0a]" />; // Evita parpadeos
+    if (loading) return <div className="min-h-screen bg-[#07090f]" />;
 
-    const order = config.home_sections_order || ["hero", "clients", "about", "process", "services", "contact"];
+    const order = config.home_sections_order || ["hero", "about", "services", "process", "clients", "contact"];
 
     return (
-        <>
+        <div className="bg-[#07090f]">
             {order.map((sectionId) => {
                 switch (sectionId) {
                     case "hero": return <HeroSection key="hero" />;
@@ -42,6 +42,6 @@ export default function HomeLayout() {
                     default: return null;
                 }
             })}
-        </>
+        </div>
     );
 }
